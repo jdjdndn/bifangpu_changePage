@@ -56,15 +56,16 @@
   // 为自定义的 'urlChanged' 事件添加监听器
   window.addEventListener('urlChanged', function () {
     resetUrlParams(location.href)
+    setHrefStr()
   });
   // 监听键盘按键事件
-  document.addEventListener('keydown', function (event) {
+  document.addEventListener('keyup', function (event) {
     // 判断按键
-    switch (event.key) {
-      case 'ArrowLeft': // 左箭头键
+    switch (event.keyCode) {
+      case 40: // 下
         fn.down()
         break;
-      case 'ArrowRight': // 右箭头键
+      case 38: // 上
         fn.up()
         break;
     }
@@ -104,7 +105,7 @@
       urlParams[key] = value;
     }
     origin = hashArr[0];
-    console.log('urlParams', urlParams);
+    // console.log('urlParams', urlParams);
   }
 
   /**
