@@ -120,20 +120,6 @@
   changePageObj.getValueObj(location.host)
   const fn = changePageObj.getHashStr(location.href)
 
-  //   function parseQuery(urlParamsString) {
-  // const urlParams = new URLSearchParams(urlParamsString);
-
-  // // 创建一个空对象来存储参数
-  // const paramsObj = {};
-
-  // // 遍历参数并添加到对象中
-  // for (const [key, value] of urlParams) {
-  //   paramsObj[key] = value;
-  // }
-
-  // console.log(paramsObj);
-  //   }
-
   function callback(mutationsList, observer) {
     if (lastExecutionTime + delay < Date.now()) {
       // setHrefStr()
@@ -143,9 +129,7 @@
 
   let observer = new MutationObserver(callback);
 
-
   observer.observe(document.body, { childList: true, attributes: true });
-
 
   // 创建一个 History 实例
   const history = window.history;
@@ -160,11 +144,13 @@
     return result;
   };
 
-  // 为自定义的 'urlChanged' 事件添加监听器
-  window.addEventListener('urlChanged', function () {
+  function urlChange() {
     changePageObj.resetUrlParams(location.href)
     // setHrefStr()
-  });
+  }
+  // 为自定义的 'urlChanged' 事件添加监听器
+  window.addEventListener('popstate', urlChange);
+  window.addEventListener('urlChanged', urlChange);
   // 监听键盘按键事件
   document.addEventListener('keyup', function (event) {
     event.preventDefault()
