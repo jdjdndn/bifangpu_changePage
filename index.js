@@ -8,6 +8,7 @@
 // @match        https://www.google.com/search?q=*
 // @match        https://www.google.com.hk/search?q=*
 // @match        https://search.bilibili.com/*
+// @match        *://*/*
 // @grant        none
 // ==/UserScript==
 
@@ -32,8 +33,6 @@
       }
       // 浏览器url ? 后面的参数解析成对象形式
       this.urlParams = null
-      // url问号前面的部分
-      this.origin = null
     }
 
     // 将keyObj与valueObj配对，存入weakMap中
@@ -62,15 +61,15 @@
 
 
     // 重置参数
-    resetUrlParams(hrefUrl) {
+    resetUrlParams() {
+      const { search } = location
       this.urlParams = {}
       this.matchKeys['current'] = this.matchKeys['start']
-      let hashArr = hrefUrl.split('?')
-      if (hashArr.length < 2) {
-        this.origin = hrefUrl
+      let searchStr = search.slice('1')
+      if (!searchStr) {
         return
       }
-      let arr = hashArr[1].split('&');
+      let arr = searchStr.split('&');
       for (let i = 0; i < arr.length; i++) {
         const current = arr[i]
         const key = current.split('=')[0]
@@ -81,25 +80,25 @@
         }
         this.urlParams[key] = value;
       }
-      this.origin = hashArr[0];
     }
     // 获取设置参数方法
-    getHashStr(hrefUrl) {
-      this.resetUrlParams(hrefUrl)
+    getHashStr() {
+      this.resetUrlParams()
       const _this = this
       return {
         // 返回方法,每调用一次,page属性值增加并将 origin和遍历obj属性与值拼接
         up() {
+          const { origin, pathname } = location
           _this.matchKeys['current'] = parseInt(_this.matchKeys['current'], 10) + _this.matchKeys['step']
           const parms = Object.keys(_this.urlParams).map(key => key + '=' + _this.urlParams[key]).join('&')
-          const href = _this.origin + '?' + (parms ? parms + '&' : '') + _this.matchKeys['key'] + '=' + parseInt(_this.matchKeys['current'], 10)
+          const href = origin + pathname + '?' + (parms ? parms + '&' : '') + _this.matchKeys['key'] + '=' + parseInt(_this.matchKeys['current'], 10)
           location.href = href
         },
         down() {
           _this.matchKeys['current'] = parseInt(_this.matchKeys['current'], 10) - _this.matchKeys['step']
           if (parseInt(_this.matchKeys['current'], 10) <= 0) return
           const parms = Object.keys(_this.urlParams).map(key => key + '=' + _this.urlParams[key]).join('&')
-          const href = _this.origin + '?' + (parms ? parms + '&' : '') + _this.matchKeys['key'] + '=' + parseInt(_this.matchKeys['current'], 10)
+          const href = origin + pathname + '?' + (parms ? parms + '&' : '') + _this.matchKeys['key'] + '=' + parseInt(_this.matchKeys['current'], 10)
           location.href = href
         }
       }
@@ -136,21 +135,29 @@
 
   // 保存原始的 pushState 方法
   const originalPushState = history.pushState;
+  const originalReplaceState = history.replaceState
 
   // 重写 pushState 方法来触发自定义事件
-  history.pushState = function () {
+  history.pushState = function (e) {
     const result = originalPushState.apply(this, arguments);
-    window.dispatchEvent(new Event('urlChanged'));
+    window.dispatchEvent(new Event('pushstate'))
+    window.dispatchEvent(new Event('urlchange'));
     return result;
+  };
+  history.replaceState = function replaceState(...args) {
+    const newReplaceState = originalReplaceState.apply(this, args);
+    window.dispatchEvent(new Event('replacestate'));
+    window.dispatchEvent(new Event('urlchange'));
+    return newReplaceState;
   };
 
   function urlChange() {
-    changePageObj.resetUrlParams(location.href)
+    changePageObj.resetUrlParams()
     // setHrefStr()
   }
-  // 为自定义的 'urlChanged' 事件添加监听器
+  // 为自定义的 'urlchange' 事件添加监听器
   window.addEventListener('popstate', urlChange);
-  window.addEventListener('urlChanged', urlChange);
+  window.addEventListener('urlchange', urlChange);
   // 监听键盘按键事件
   document.addEventListener('keyup', function (event) {
     event.preventDefault()
