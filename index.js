@@ -10,6 +10,7 @@
 // @match        https://search.bilibili.com/*
 // @match        *://*/*
 // @grant        none
+// @run-at      document-idle
 // ==/UserScript==
 
 
@@ -95,6 +96,7 @@
           location.href = href
         },
         down() {
+          const { origin, pathname } = location
           _this.matchKeys['current'] = parseInt(_this.matchKeys['current'], 10) - _this.matchKeys['step']
           if (parseInt(_this.matchKeys['current'], 10) <= 0) return
           const parms = Object.keys(_this.urlParams).map(key => key + '=' + _this.urlParams[key]).join('&')
