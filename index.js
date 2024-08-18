@@ -9,6 +9,7 @@
 // @match        https://www.google.com.hk/search?q=*
 // @match        https://search.bilibili.com/*
 // @match        *://*/*
+// @exclude           *://www.douyin.com/*
 // @grant        none
 // @run-at      document-idle
 // ==/UserScript==
