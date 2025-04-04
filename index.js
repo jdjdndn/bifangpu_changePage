@@ -118,6 +118,16 @@
     start: 0,
     step: 10,
   })
+  changePageObj.peiDui(['www.baidu.com'], {
+    key: 'pn',
+    start: 0,
+    step: 10,
+  })
+  changePageObj.peiDui(['s.1688.com'], {
+    key: 'beginPage',
+    start: 1,
+    step: 1,
+  })
 
   changePageObj.getValueObj(location.host)
   const fn = changePageObj.getHashStr(location.href)
